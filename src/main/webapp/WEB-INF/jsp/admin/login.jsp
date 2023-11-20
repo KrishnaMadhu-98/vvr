@@ -74,13 +74,13 @@
 
 							<div class="form-group">
 								<div id="logincaptchadiv"></div>
-								<span class="redText" id="errorMsg"></span>
+								<span class="text-danger pt-4" id="errorMsg"></span>
 							</div>
 
 							<div class="form-group mb-0 offset-8 pt-4"">
 								<button class="btn btn-primary btn-block py-2 col-12" type="submit" onclick="return validateCaptcha()">
 									Log In</button>
-								<div id="error_msg" class="marTop5px redTxt pb-1"
+								<div id="error_msg" class="text-danger pt-4"
 									style="float: right; padding-right: 10px;">${errorMsg}</div>
 							</div>
 

@@ -32,4 +32,13 @@ public class BookingInfoService {
 		return count;
 	}
 
+	public String saveBlockDetails(BookingInfoForm formDetails) throws Exception {		
+					
+		String BookingRes = bookingInfoDaoImpl.saveBlockDetails(formDetails);
+
+			
+			return BookingRes;
+		
+
+	}
 }

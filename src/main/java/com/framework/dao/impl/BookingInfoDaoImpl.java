@@ -62,8 +62,8 @@ public class BookingInfoDaoImpl {
 				StringBuffer queryString3 = new StringBuffer("insert into hotelsystem.tt_user_transaction ( user_id,"
 						+ " booking_id, voucher_no, voucher_date, total_amount, paid_amount,bal_amount,  "
 						+ " payment_method, payment_gateway, pg_status, created_by, created_date, "
-						+ "modified_by, modified_date, active,discount_amount, coupon_code) "
-						+ "values (?, ?, ? , now(), ?, ? ,?, 'PG', 'aut', 'INITIATED', ? , now(), ? , now(), true,?,?)");
+						+ "modified_by, modified_date, active,discount_amount, coupon_code,advance_amount,final_amount,advance_refid,final_refid) "
+						+ "values (?, ?, ? , now(), ?, ? ,?, 'PG', 'aut', 'INITIATED', ? , now(), ? , now(), true,?,?,0,0,'','')");
 
 				jdbcTempalte.update(queryString3.toString(), userId, bookingId,
 						voucherNum, Double.parseDouble(formDetails.getAmount()), 0, Double.parseDouble(formDetails.getAmount()), userId, userId,0, "");
@@ -73,14 +73,9 @@ public class BookingInfoDaoImpl {
 				 String SITEHEADING = PropertyFileConfig.getPropertyValues("Site_heading");
 				 String REGMESSAGE = PropertyFileConfig.getPropertyValues("booking.message.english");
 				 String  REGSUBJECT= PropertyFileConfig.getPropertyValues("booking.subject.english");
-				 String REGTEMP = PropertyFileConfig.getPropertyValues("email_template_english");
-
-				 /*
-				 * TtMailQueueDetails ttMailQueueDetails =
-				 * mailQueueService.saveMailQueue(SITEHEADING, REGSUBJECT, "455", REGMESSAGE,
-				 * "eng","xxx@mail.com", "Booking Conformation", userId, 1);
-				 * mailQueueDao.save(ttMailQueueDetails);
-				 */	
+				 //String REGTEMP = PropertyFileConfig.getPropertyValues("email_template_english");
+				 String REGTEMP = PropertyFileConfig.getPropertyValues("email_booking_template_english");				 
+				 
 				 REGTEMP = REGTEMP.replaceAll("<<UserName>>", formDetails.getFirstName()+" "+formDetails.getLastName());
 				 REGTEMP = REGTEMP.replaceAll("<<Main Message>>", REGMESSAGE);
 						
@@ -105,27 +100,74 @@ public class BookingInfoDaoImpl {
 	  
 	  public long getCount(BookingInfoForm formDetails) throws ParseException {
 		  long roomCount=0;
+		  long blockingRoomCount=4;
 		  String fd = formDetails.getFromDate();
 			String td = formDetails.getFromDate();
 			DateFormat formatter;
 			Date dateFormat;
 			Date dateFormat1;
 			formatter = new SimpleDateFormat("MM/dd/yyyy");
-			dateFormat = (Date) formatter.parse(fd);
-			dateFormat1 = (Date) formatter.parse(td);
-			java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat(
-					"yyyy-MM-dd");
-			java.sql.Date fromdate = new java.sql.Date(dateFormat.getTime());
-			java.sql.Date todate = new java.sql.Date(dateFormat1.getTime());
+			java.sql.Date fromdate,todate;
+			if(formDetails.getAmount() !=null) {
+				dateFormat = (Date) formatter.parse(fd);
+				dateFormat1 = (Date) formatter.parse(td);
+				fromdate = new java.sql.Date(dateFormat.getTime());
+				 todate = new java.sql.Date(dateFormat1.getTime());
+			}
+			else {
+				java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat(
+						"yyyy-MM-dd");
+				 fromdate = new java.sql.Date(dateFormatter.parse(fd).getTime());
+				 todate = new java.sql.Date(dateFormatter.parse(td).getTime());
+			}
+			
+			
 
-		  StringBuffer queryString = new StringBuffer("select case when count(rooms) != 0 then 4-sum(rooms::integer) else 4 end as count from hotelsystem.tt_booking_info tbi where active =true and  selected_to_date >=?");			
+				  StringBuffer queryString1 = new StringBuffer("select case when count(rooms) != 0 then 4-sum(rooms::integer) else 4 end as count from hotelsystem.tt_blocking_info tbi where active =true and  selected_to_date >=?");			
+				
+
+				  blockingRoomCount = jdbcTempalte.queryForObject(queryString1.toString(), new Object[] {todate},Integer.class);
+				
+					
+	  if(blockingRoomCount >0) {
+		  StringBuffer queryString = new StringBuffer("select case when count(rooms) != 0 then sum(rooms::integer) else 0 end as count from hotelsystem.tt_booking_info tbi where active =true and  selected_to_date >=?");			
 		
 
 		  roomCount = jdbcTempalte.queryForObject(queryString.toString(), new Object[] {todate},Integer.class);
-			
+	  }
+		  long availableRommCount = (blockingRoomCount -roomCount) ;
+	
 		 
-		  return roomCount;
+		  return availableRommCount;
 	  }
 	 
+	  public String saveBlockDetails(BookingInfoForm formDetails) throws Exception {
+			try {
+				String fd = formDetails.getFromDate();
+				String td = formDetails.getToDate();
+			
+			  java.text.SimpleDateFormat  dateFormatter = new java.text.SimpleDateFormat( "yyyy-MM-dd"); 
+			 
+			  java.sql.Date	  fromdate = new java.sql.Date( dateFormatter.parse(fd).getTime());
+			  java.sql.Date	  enddate = new java.sql.Date( dateFormatter.parse(td).getTime());
+					 
 
+				long bookingId =0,userId =0;
+				//Date dt=new Date(formDetails.getFromDate());
+				StringBuffer queryString = new StringBuffer("INSERT INTO hotelsystem.tt_blocking_info " + 
+						"			(selected_from_date, selected_to_date, rooms, created_by, created_date, modified_by, modified_date, active) " + 
+						"			VALUES(?, ?, ?, ?, now(), ?, now(), true) returning id");			
+			
+
+				 bookingId = jdbcTempalte.queryForObject(queryString.toString(), new Object[] {fromdate,enddate, formDetails.getCountOfRooms(),1,1},Integer.class);
+			
+				
+				
+				return "updated";
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
+			}
+		}
+		
 }

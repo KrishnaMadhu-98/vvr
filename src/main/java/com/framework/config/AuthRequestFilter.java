@@ -17,7 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class AuthRequestFilter extends OncePerRequestFilter {
 
 	public static final String[] whiteListURIs = new String[] {"/", "","/home","/admin","/admin/login", "/login", "/logout", "/authenticate","/hotel","/hotel/img","/hotel/css", "/images","/fonts", "/css" , "/js","/bookingInfo"
-			,"/test","/getBookingInfo","/personalInfo","/saveBookingDetails","dashboard","/mailQueue","/testController","/cancelBooking","/newVersion","/newVersion_overView","/test2","/overView","/js_file","/css_file"};
+			,"/test","/getBookingInfo","/personalInfo","/saveBookingDetails","dashboard","/mailQueue","/testController","/cancelBooking","/newVersion","/newVersion_overView","/test2","/overView","/js_file","/css_file","/checkAvailablity"};
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

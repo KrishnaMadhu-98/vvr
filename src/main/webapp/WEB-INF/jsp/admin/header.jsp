@@ -36,7 +36,7 @@
 </head>
 <body>
 	<div class="container-fluid">
-		<jsp:include page="/WEB-INF/jsp/admin/banner.jsp"></jsp:include>
+		
 		<%-- <jsp:include page="/WEB-INF/jsp/menus.jsp"></jsp:include> --%>
 	</div>
 	<section id="body-section">

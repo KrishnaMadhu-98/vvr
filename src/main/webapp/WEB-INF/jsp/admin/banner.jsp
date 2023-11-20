@@ -10,12 +10,12 @@
 							onclick="return showPassword();">
 							<i class="fa fa-key btn-icon"> Change Password</i>
 						</button></span></li> -->
-				<!-- <li class="nav-item"><a class="nav-link" href="#"
-					data-toggle="modal" onclick="return showPassword();"> <span
+				 <li class="nav-item"><a class="nav-link" 
+					data-toggle="modal" onclick="return showModalForBlock();"> <span
 						class="item_outer text-primary"> <i class="fas fa-key mr-1"></i>
-							Change Password
+							Block Room
 					</span>
-				</a></li> -->
+				</a></li>
 				<li class="nav-item"><a class="nav-link" href="#"> <span
 						class="item_outer"> 
 							<b>Welcome!</b> ${userName}
@@ -32,4 +32,3 @@
 	</nav>
 </div>
 
-<jsp:include page="/WEB-INF/jsp/admin/footerjs.jsp"></jsp:include>

@@ -47,5 +47,7 @@ public class UserService {
 	public String cancelBooking(long id) {
 		return usersDaoImpl.cancelBooking(id);
 	}
-	
+	public String editUserDetails(BookingInfoForm bookingform) {
+		return usersDaoImpl.editUserDetails(bookingform);
+	}
 }

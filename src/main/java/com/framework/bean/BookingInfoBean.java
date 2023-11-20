@@ -1,9 +1,9 @@
 package com.framework.bean;
 
 public class BookingInfoBean {
-	
+
 	private Long id;
-	
+
 	private String firstName;
 
 	private String lastName;
@@ -11,9 +11,51 @@ public class BookingInfoBean {
 	private String email;
 
 	private String phone;
+
+	private String createdDate;
 	
-	private String createdDate; 
-	private String fromDate; 
+	private String fromDate;
+
+	private String advanceAmount;
+	
+	private String finalAmount;
+	
+	private String advanceRefId;
+	
+	private String finalRefId;
+
+	public String getAdvanceAmount() {
+		return advanceAmount;
+	}
+
+	public void setAdvanceAmount(String advanceAmount) {
+		this.advanceAmount = advanceAmount;
+	}
+
+	public String getFinalAmount() {
+		return finalAmount;
+	}
+
+	public void setFinalAmount(String finalAmount) {
+		this.finalAmount = finalAmount;
+	}
+
+	public String getAdvanceRefId() {
+		return advanceRefId;
+	}
+
+	public void setAdvanceRefId(String advanceRefId) {
+		this.advanceRefId = advanceRefId;
+	}
+
+	public String getFinalRefId() {
+		return finalRefId;
+	}
+
+	public void setFinalRefId(String finalRefId) {
+		this.finalRefId = finalRefId;
+	}
+
 	public String getTotalAmount() {
 		return totalAmount;
 	}
@@ -38,13 +80,13 @@ public class BookingInfoBean {
 		this.balAmount = balAmount;
 	}
 
-	private String toDate; 
+	private String toDate;
 
 	private String totalAmount;
 	private String paidAmount;
-	
+
 	private String balAmount;
-	
+
 	public String getCreatedDate() {
 		return createdDate;
 	}
@@ -108,9 +150,5 @@ public class BookingInfoBean {
 	public void setToDate(String toDate) {
 		this.toDate = toDate;
 	}
-	
-	
-	
-	
 
 }

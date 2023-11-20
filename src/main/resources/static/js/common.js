@@ -40,7 +40,7 @@ function getBusinessDatesCount(checkin,checkout) {
 	$('.weekendDaysDisplay').removeClass('d-none');
     while (curDate < endDate) {
         const dayOfWeek = curDate.getDay();
-        if(dayOfWeek !== 0 && dayOfWeek !== 6 && dayOfWeek !== 5) weekDaysCount++
+        if(dayOfWeek !== 0 && dayOfWeek !== 6 &&  dayOfWeek !== 1) weekDaysCount++
         else weekendDaysCount++;
         curDate.setDate(curDate.getDate() + 1);
     }
@@ -110,7 +110,7 @@ if(fromdate == '' || fromdate ==null || fromdate ==undefined){
 	'<div class="text-danger"> Date is required.</div>');
 	return false;
 }
-	var emailId = $('#email').val();
+	    var emailId = $('#email').val();
 		var phone = $('#phoneNum').val();
 		var firstName = $('#firstName').val();
 		var lastName = $('#lastName').val();
@@ -287,7 +287,7 @@ function addChildCount(val){
 
 }
 
-function updateRoomAndGuestInfo(){
+function updateRoomAndGuestInfo(val=null){
 	var checkin = $('#checkin').val();
 	var checkout = $('#checkout').val();
 	$('.guestItem').removeClass('d-none');
@@ -318,6 +318,7 @@ function updateRoomAndGuestInfo(){
 	sessionStorage.setItem("countOfRooms", document.getElementById('countOfRooms').innerText);
 	sessionStorage.setItem("countOfChild", document.getElementById('countOfChild').innerText);
 	sessionStorage.setItem("countOfAdults", document.getElementById('countOfAdults').innerText);
+	val=='search' || val=='checkAvail' || val=='overView'?checkAvailableRooms(val):'';
 }
 
 function searchVal(){
@@ -548,7 +549,7 @@ function hideSearchModal(){
 		sessionStorage.setItem("checkoutValue", end
 				);
 		updateRoomAndGuestInfo();
-		document.getElementById('submitLabelName').innerHTML = "Reserve";
+		document.getElementById('submitLabelName').innerHTML = "Booking Your Trip";
 		$('.showPayAmount').addClass("d-block");
 		$('.showPayAmount').removeClass("d-none");
 
@@ -617,7 +618,7 @@ const date = new Date();
 							sessionStorage.setItem("checkoutVal", end
 									.format('DD MMM YYYY'));
 							updateRoomAndGuestInfo();
-							document.getElementById('submitLabelName').innerHTML = "Reserve";
+							document.getElementById('submitLabelName').innerHTML = "Booking Your Trip";
 							$('.showPayAmount').addClass("d-block");
 							$('.showPayAmount').removeClass("d-none");
 							
@@ -625,4 +626,65 @@ const date = new Date();
 									.log("New date range selected: ' + start.format('ddd DD MM YYYY') + ' to ' + end.format('ddd DD MM YYYY') + ' (predefined range: ' + label + ')");
 
 						}); });
+	
+	function checkAvailableRooms(val){
+		var fromdate= sessionStorage.getItem("checkin")!=null && sessionStorage.getItem("checkin")!=undefined?sessionStorage.getItem("checkin"):'';
+		var todate= sessionStorage.getItem("checkout")!=null && sessionStorage.getItem("checkout")!=undefined?sessionStorage.getItem("checkout"):'';
+		var fromdateValue= sessionStorage.getItem("checkinValue")!=null && sessionStorage.getItem("checkinValue")!=undefined?sessionStorage.getItem("checkinValue"):'';
+		var todateValue= sessionStorage.getItem("checkoutValue")!=null && sessionStorage.getItem("checkoutValue")!=undefined?sessionStorage.getItem("checkoutValue"):'';
+		
+		var countOfAdults = parseInt(document.getElementById('countOfAdults').innerText) ;
+		
+		var countOfChild =parseInt(document.getElementById('countOfChild').innerText);
+		var countOfRooms = parseInt(document.getElementById('countOfRooms').innerText);
+		var amt=sessionStorage.getItem("amountval");
+		
+				
+	$(".DateError").html('');
+	if(fromdate == '' || fromdate ==null || fromdate ==undefined){
+		$(".DateError").html(
+		'<div class="text-danger"> Date is required.</div>');
+		return false;
+	}
+		   
+			
+			$.ajax({
+				type : "POST",
+				//contentType : 'application/json',
+				url : 	"checkAvailablity",
+				data : {
+					"amount":amt,
+					"fromDate" : fromdate,
+					"toDate" : todate,
+					"countOfAdults":countOfAdults,
+					"countOfChild":countOfChild,
+					"countOfRooms":countOfRooms
+				},
+				
+				success : function(response) {
+					if(response.message =='available'){
+						if(val=='search'){
+						hideSearchModal();
+						showAvail();
+						}else if(val=='checkAvail'){
+							showAvailability()
+						}else if(val=='overView'){
+							saveBookingDetails()
+						}
+						
+					}else{						
+						$('#myModal2').modal('show');
+						sessionStorage.clear();
+					}
+					
+				},
+				error : function(res) {
+					
+					$('#myModalError').modal('show');
+
+				}
+
+			});
+			return false;
+		}
 	

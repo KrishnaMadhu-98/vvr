@@ -61,7 +61,7 @@ public class UsersDaoImpl {
 			BookingListResEntity filingResEntity = new BookingListResEntity();
 			try {
 
-				StringBuffer columnQuery = new StringBuffer("tbi.id, first_name ,last_name ,email ,phone, to_char(tu.created_date, 'MM/DD/YYYY') as createdDate ,to_char(tbi.selected_from_date, 'MM/DD/YYYY') as fromDate ,to_char(tbi.selected_to_date, 'MM/DD/YYYY') as toDate ,tut.total_amount ,tut.paid_amount ,tut.bal_amount");
+				StringBuffer columnQuery = new StringBuffer("tbi.id, first_name ,last_name ,email ,phone, to_char(tu.created_date, 'MM/DD/YYYY') as createdDate ,to_char(tbi.selected_from_date, 'MM/DD/YYYY') as fromDate ,to_char(tbi.selected_to_date, 'MM/DD/YYYY') as toDate ,tut.total_amount ,tut.paid_amount ,tut.bal_amount,advance_amount,final_amount,advance_refid as advanceRefId,final_refid as finalRefId ");
 				
 
 				StringBuffer tableQuery = new StringBuffer(
@@ -161,6 +161,49 @@ public class UsersDaoImpl {
 							"UPDATE hotelsystem.tt_booking_info SET active = false WHERE id = ?");
 						jdbcTemplate.update(queryString.toString(), new Object[] {id });
 					return "deleted";
+				} catch (Exception e) {
+					throw e;
+				}
+		  }
+		 
+		 public String editUserDetails(BookingInfoForm bookingform) { 
+			 
+			  try {
+					StringBuffer queryString = new StringBuffer(
+							"UPDATE hotelsystem.tt_user SET email=?  WHERE id = ? and active = true");
+						jdbcTemplate.update(queryString.toString(), new Object[] {bookingform.getEmail(),bookingform.getId() });
+						StringBuffer queryString1 = new StringBuffer(
+								"UPDATE hotelsystem.tt_user_transaction SET active = true");
+						String whereClause =" WHERE booking_id= ? and active = true";
+						Double amount =(double) 0;
+						if(bookingform.getAdvanceAmount()!=null && bookingform.getAdvanceAmount()!="") {
+							queryString1.append(",advance_amount = '"+bookingform.getAdvanceAmount()+"'");
+							amount =Double.parseDouble(bookingform.getAdvanceAmount()) +amount;
+						}
+						if(bookingform.getAdvanceRefId()!=null && bookingform.getAdvanceRefId()!="" ) {
+							queryString1.append(",advance_refid = '"+bookingform.getAdvanceRefId()+"'");
+						}
+
+if(bookingform.getFinalAmount()!=null && bookingform.getFinalAmount()!=""  ) {
+	queryString1.append(",final_amount = '"+bookingform.getFinalAmount()+"'");
+	amount =Double.parseDouble(bookingform.getFinalAmount()) +amount;
+}
+if(bookingform.getFinalRefId()!=null && bookingform.getFinalRefId()!=""  ) {
+	queryString1.append(",final_refid = '"+bookingform.getFinalRefId()+"'");
+}	
+if(amount !=null && amount >=0) {
+	queryString1.append(",paid_amount = '"+amount+"'");
+}
+if(bookingform.getAmount() !=null && bookingform.getAmount() !="") {
+	amount =Double.parseDouble(bookingform.getAmount()) - amount ;
+}
+if(amount !=null && amount >=0) {
+	queryString1.append(",bal_amount = '"+amount+"'");
+}
+queryString1.append(whereClause);
+jdbcTemplate.update(queryString1.toString(), new Object[] {bookingform.getId() });
+
+return "updated";
 				} catch (Exception e) {
 					throw e;
 				}

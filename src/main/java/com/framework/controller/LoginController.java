@@ -30,6 +30,7 @@ import com.framework.common.Constants;
 import com.framework.dto.UserManagement;
 import com.framework.form.BookingInfoForm;
 import com.framework.form.LoginForm;
+import com.framework.service.BookingInfoService;
 import com.framework.service.UserService;
 
 
@@ -41,16 +42,23 @@ public class LoginController {
 	
 	@Autowired
 	UserService userService;
-	
+	@Autowired
+	BookingInfoService bookingInfoService;
 	
 	@RequestMapping(value = {"/admin","/admin/", "/admin/login"})
 	public ModelAndView login( HttpServletRequest httpRequest) {
 		MDC.put(Constants.ACTION, "login");
 		logger.info("Entering");
+		ModelMap model = new ModelMap();
 		try {
+			if(	httpRequest.getSession().getAttribute("errorMsg")!=null){
+				model.addAttribute("errorMsg", httpRequest.getSession().getAttribute("errorMsg"));
+				httpRequest.getSession().removeAttribute("errorMsg");
+			}
 			httpRequest.getSession().invalidate();
 			logger.info("Exiting");
-			return new ModelAndView("/admin/login");
+
+			return new ModelAndView("/admin/login",model);
 		} catch (Exception exception) {
 			logger.error(ExceptionUtils.getStackTrace(exception));
 			logger.info("Exiting");
@@ -74,10 +82,11 @@ public class LoginController {
 				
 				return new ModelAndView("redirect:/dashboard");
 			}else {
-				model.addAttribute("errorMsg", "Invalid Email or Password!");
+				httpRequest.getSession().setAttribute("errorMsg", "Invalid Email or Password!");
+				
 			}
 			logger.info("Exiting");
-			return new ModelAndView("/admin/login", model);
+			return new ModelAndView("redirect:/admin", model);
 		} catch (Exception exception) {
 			logger.error(ExceptionUtils.getStackTrace(exception));
 			logger.info("Exiting");
@@ -125,11 +134,13 @@ public class LoginController {
 	}
 	
 	@RequestMapping(value = "/admin/getBookingInfo", method = {RequestMethod.GET, RequestMethod.POST})
-	public ModelAndView getRecentBookings(@ModelAttribute BookingInfoForm bookingform)	{
+	public ModelAndView getRecentBookings(@ModelAttribute BookingInfoForm bookingform,HttpServletRequest httpRequest)	{
 		ModelMap model = new ModelMap();
 		String nextPage = "admin/recentBooking";
 		String errorPage = "admin/recentBooking";
 		try {
+			if(httpRequest.getSession().getAttribute("userName")!=null) {
+				
 			
 			BookingListResEntity BookingRes = userService.getRecentBooking(bookingform);
 			model.addAttribute("bookingList", BookingRes.getFilingList());
@@ -148,6 +159,18 @@ public class LoginController {
 				model.addAttribute("pagination", pagination);
 				model.addAttribute("pageNo", pageNo);
 			}
+			if(httpRequest.getSession().getAttribute("errorMsg")!=null) {
+				model.addAttribute("errorMsg", httpRequest.getSession().getAttribute("errorMsg"));
+				httpRequest.getSession().removeAttribute("errorMsg");
+			}else if(httpRequest.getSession().getAttribute("sucMsg")!=null){
+					model.addAttribute("sucMsg", httpRequest.getSession().getAttribute("sucMsg"));
+					httpRequest.getSession().removeAttribute("sucMsg");
+
+			}
+			}else {
+				httpRequest.getSession().setAttribute("errorMsg", "Session has been Expired");
+				return new ModelAndView("redirect:/admin");
+			}
 		} catch (Exception exception) {
 			exception.printStackTrace();
 			return new ModelAndView(errorPage, model);
@@ -161,5 +184,50 @@ public class LoginController {
 		String status=userService.cancelBooking(id);
 	
 			return status;
+		}
+	 
+	 @PostMapping(value = "/admin/editUserDetails")
+		public ModelAndView editUserDetails(@ModelAttribute BookingInfoForm bookingform)	{
+			ModelMap model = new ModelMap();
+			String nextPage = "admin/recentBooking";
+			String errorPage = "admin/recentBooking";
+			try {
+				
+				String BookingRes = userService.editUserDetails(bookingform);
+				if(BookingRes.equalsIgnoreCase("updated")) {
+					return new ModelAndView("redirect:/admin/getBookingInfo");
+				}
+				
+			} catch (Exception exception) {
+				exception.printStackTrace();
+				return new ModelAndView(errorPage, model);
+			}
+			return new ModelAndView(nextPage, model);
+		}
+	 
+	 @PostMapping(value = "/admin/saveBlockDetails")
+		public ModelAndView saveBlockDetails(@ModelAttribute BookingInfoForm bookingform,HttpServletRequest httpRequest)	{
+			ModelMap model = new ModelMap();
+			String nextPage = "admin/recentBooking";
+			String errorPage = "admin/recentBooking";
+			try {				
+				long count = bookingInfoService.getCount(bookingform);
+				 if(count >= Long.parseLong(bookingform.getCountOfRooms())) {
+				String BookingRes = bookingInfoService.saveBlockDetails(bookingform);
+				if(BookingRes.equalsIgnoreCase("updated")) {
+					
+					 httpRequest.getSession().setAttribute("sucMsg", "Form Saved Successfully");
+
+					return new ModelAndView("redirect:/admin/getBookingInfo");
+				}
+				 }else {
+					 httpRequest.getSession().setAttribute("errorMsg", "Rooms not available for selected Date");
+				 }
+				
+			} catch (Exception exception) {
+				exception.printStackTrace();
+				return new ModelAndView(errorPage, model);
+			}
+			 return new ModelAndView("redirect:/admin/getBookingInfo");
 		}
 }

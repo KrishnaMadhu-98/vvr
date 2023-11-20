@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -78,31 +79,7 @@ public class HomeController {
 	
 	
 	
-	/*
-	 * @RequestMapping(value = { "/", "","/home" }) public ModelAndView home() {
-	 * String methodName = "home"; LOGGER.info("Entering Class:" + className +
-	 * " & Method:" + methodName); ModelMap model = new ModelMap(); try { String s=
-	 * PropertyFileConfig.getPropertyValues("Site_heading");
-	 * System.out.println("heading"+s); model.addAttribute("pageUrl", "home");
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); } LOGGER.info("Exiting Class:" +
-	 * className + " & Method:" + methodName); return new
-	 * ModelAndView("/web/home",model);
-	 * 
-	 * }
-	 * 
-	 * @RequestMapping(value = { "/bookingInfo", "" }) public ModelAndView
-	 * bookingInfo() { String methodName = "home"; LOGGER.info("Entering Class:" +
-	 * className + " & Method:" + methodName); ModelMap model = new ModelMap();
-	 * 
-	 * try { model.addAttribute("pageUrl", "bookingInfo");
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); } LOGGER.info("Exiting Class:" +
-	 * className + " & Method:" + methodName); return new
-	 * ModelAndView("/web/webSiteGeneral",model);
-	 * 
-	 * }
-	 */
+	
 	  @RequestMapping(value = { "/test", "" }) public ModelAndView test() { String
 	  methodName = "home"; LOGGER.info("Entering Class:" + className + " & Method:"
 	  + methodName); try {
@@ -112,21 +89,19 @@ public class HomeController {
 	 ModelAndView("/web/test");
 	  
 	  }
-	 /* 
-	 * @RequestMapping(value = { "/personalInfo", "" }) public ModelAndView
-	 * personalInfo() { String methodName = "home"; LOGGER.info("Entering Class:" +
-	 * className + " & Method:" + methodName); ModelMap model = new ModelMap();
-	 * 
-	 * try { model.addAttribute("pageUrl", "personalInfopersonalInfo");
-	 * 
-	 * 
-	 * } catch (Exception e) { e.printStackTrace(); } LOGGER.info("Exiting Class:" +
-	 * className + " & Method:" + methodName); return new
-	 * ModelAndView("/web/bookingConfirmationPage",model);
-	 * 
-	 * }
-	 */
+	
+	  @RequestMapping(value = "checkAvailablity", method = RequestMethod.POST)
+		public ResponseEntity<BaseResponse> checkAvailableRooms(@ModelAttribute  BookingInfoForm bookingInfoForm, HttpServletRequest request,
+				HttpServletResponse response) throws Exception {
+			long count = bookingInfoService.getCount(bookingInfoForm);
+			String isRoomAvailable="notAvailable";
+			 if(count >= Long.parseLong(bookingInfoForm.getCountOfRooms())) {
+				 isRoomAvailable="available";
+			  }		
+			 return ResponseEntity.ok(new BaseResponse(200, isRoomAvailable));
 
+		}
+		
 	
 	
 	}
